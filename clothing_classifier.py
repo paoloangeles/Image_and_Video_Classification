@@ -38,15 +38,27 @@ test_images = test_images/255.0
 
 model = keras.Sequential([
     keras.layers.Flatten(input_shape = (28, 28)), ## flattens 2d array/image into 1d array of 784 pixels
-    keras.layers.Dense(128, activation_layer = 'relu'), ## first dense array outputs 128 nodes
+    keras.layers.Dense(128, activation = 'relu'), ## first dense array outputs 128 nodes
     keras.layers.Dense(10) ## second dense array outputs to 10 nodes for the 10 classes of clothing
     ])
 
 ## Set up how the model learns
 
 model.compile(optimizer = 'adam', ## improved extension of the gradient descent algorithm
-              loss = tf.keras.losses.sparse_categorical_crossentropy(from_logits = True), ## the loss parameter used for multi-label classification, we need to reduce this variable. It changes
+              loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits = True), ## the loss parameter used for multi-label classification, we need to reduce this variable. It changes
                                                                                           ## with the predicted probability of the observation labels - i.e. higher when predicted probability is low for correct label
                                                                                           ## cross entropy is the measure of difference between two probability distributions for a given random variable or set of events
               metrics = ['accuracy'] ## final variable to measure performance of model (i.e. good/bad). Higher accuracies would mean lower losses and hence less needed optimisation.
               )
+
+model.fit(train_images, train_labels, epochs = 10)  ## fit model to training data and output accuracies every epoch
+
+test_loss, test_acc = model.evaluate(test_images, test_labels, verbose = 2)
+print('\nTest accuracy: ', test_acc)
+print('\nTest loss: ', test_loss)
+
+
+probability_model = tf.keras.Sequential([model, tf.keras.layers.Softmax()]) ## Attach a softmax layer to convert logits to probability (easier to interpret), essentially normalises (sum of all to 1) results according to labels
+predictions = probability_model.predict(test_images)
+
+print(predictions[0])
